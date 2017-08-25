@@ -3,7 +3,7 @@
 
 	PROCESSOR 6502
 	INCLUDE "vcs.h"		; Provides RIOT & TIA memory map
-	INCLUDE "macro.h"	; This file includes some helper macros
+	INCLUDE "macro.h"		; This file includes some helper macros
 
 
 ;;;-----------------------------------------------------------------------------
@@ -13,31 +13,31 @@
 	ORG $F000
 init	CLEAN_START		; Initializes Registers & Memory
 
+
 main_loop:
 	VERTICAL_SYNC		; 4 scanlines Vertical Sync signal
 	iny
 	sty COLUBK
 
 	ldx #34			; 34 VBlank lines
-.vblank:
-	dex
-	sta WSYNC
-	bne .vblank
+	jsr skiplines
 
-	ldx #248		; 248 Kernel lines
-.kernel:
-	dex
-	sta WSYNC
-	bne .kernel
+	ldx #248			; 248 Kernel lines
+	jsr skiplines
 
 	ldx #26			; 26 Overscan lines
-.overscan:
-	dex
-	sta WSYNC
-	bne .overscan
+	jsr skiplines
 
 	jmp main_loop
 
+
+; X register must contain the number of scanlines to skip
+; X register will have value 0 on exit
+skiplines:
+	dex
+	sta WSYNC
+	bne skiplines
+	rts
 
 ;;;-----------------------------------------------------------------------------
 ;;; Reset Vector
